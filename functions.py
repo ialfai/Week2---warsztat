@@ -1,6 +1,7 @@
 # connecting to database
 import hashlib
-
+import random
+import string
 from connection import connect, connect1
 
 def execute_query(query, return_result=True, connection_method = connect1()):
@@ -75,6 +76,7 @@ def generate_salt():
     :rtype: str
     :return: str with generated salt
     """
+    ALPHABET = string.ascii_letters
     salt = ""
     for i in range(0, 16):
         # get a random element from the iterable

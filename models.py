@@ -11,7 +11,7 @@ class User:
     #getter to read id and hashed_password
     @property
     def id(self):
-        return self.id
+        return self._id
 
     @property
     def hashed_password(self):
@@ -27,34 +27,76 @@ class User:
         self.set_password(password)
 
     #methods must have cursor as argument
+    ...
     def save_to_db(self, cursor):
         if self._id == -1:
-            sql = '''
-            INSERT INTO users(username, hashed_password)
-            values(%s, %s) RETURNING id
-            '''
+            sql = """INSERT INTO users(username, hashed_password)
+                            VALUES(%s, %s) RETURNING id"""
             values = (self.username, self.hashed_password)
             cursor.execute(sql, values)
-            self._id = cursor.fetchone()[0]
+            self._id = cursor.fetchone()[0]  # or cursor.fetchone()['id']
             return True
-        return False
+        else:
+            sql = """UPDATE Users SET username=%s, hashed_password=%s
+                           WHERE id=%s"""
+            values = (self.username, self.hashed_password, self.id)
+            cursor.execute(sql, values)
+            return True
+
+
+
     #
     # def load_user_by_username(self):
     #     return
-    #
-    # def load_user_by_id(self):
-    #     return
-    #
-    # def load_all_users(self):
-    #     return
-    #
-    # def delete(self):
-    #     return
+
+    @staticmethod
+    def load_user_by_id(cursor, id_):
+        sql ='''
+        SELECT id, username, hashed_password FROM users
+        WHERE id = %s
+        '''
+        cursor.execute(sql, (id_,))
+        data = cursor.fetchone()
+        if data:
+            id_, username, hashed_password = data
+            loaded_user = User(username)
+            loaded_user._id = id_
+            loaded_user._hashed_password = hashed_password
+            return loaded_user
+        else:
+            return None
+
+    @staticmethod
+    def load_all_users(cursor):
+        sql = '''
+        SELECT id, username, hashed_password FROM users
+        '''
+        users = []
+        cursor.execute(sql)
+        for row in cursor.fetchall():
+            id_, username, hashed_password = row
+            loaded_user = User()
+            loaded_user._id = id_
+            loaded_user.username = username
+            loaded_user._hashed_password = hash_password
+            users.append(loaded_user)
+        return users
+
+
+    def delete(self, cursor):
+        sql = '''
+        DELETE FROM users WHERE id=%s
+        '''
+        cursor.execute(sql, (self.id,))
+        self._id = -1
+        return True
 
 if __name__ == "__main__":
     cursor = connect1().cursor()
-    user1 = User("Dodo", "mocnehaslo")
 
-    user1.save_to_db(cursor)
+    a = User.load_user_by_id(cursor, 17)
+
+    a.delete(cursor)
+    print(a.id)
+
     connect1().close()
-
