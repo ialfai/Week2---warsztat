@@ -32,6 +32,7 @@ query_messages_table = '''
     id serial primary key,
     from_id int unique,
     to_id int, 
+    text varchar (300),
     creation_date timestamp,
     foreign key (from_id) references users(id),
     foreign key (to_id) references users(id)
