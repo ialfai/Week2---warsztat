@@ -1,8 +1,9 @@
 import argparse
-from models import User
-from connection import connect, connect1
-from functions import hash_password, generate_salt, check_password, list_all_users, delete_user, change_password, create_user
-
+# import psycopg2
+# from models import User
+# from connection import connect, connect1
+from functions import list_all_users, delete_user, change_password, create_user
+# from functions import hash_password, generate_salt, check_password,
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-u", "--username", help="username")
@@ -29,9 +30,7 @@ def aplikacja():
 
 
 
-
-
-if __name__ == "__main__":
+# if __name__ == "__main__":
     # create_user('Lola', 'haseleczko')
 
     # aaaaaaaaaaaaaaaaaacac24793313207d1628bcc4f4931cf8c64620df388e48f653f071e38d9d2f7

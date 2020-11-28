@@ -3,6 +3,7 @@ import hashlib
 import random
 import string
 from connection import connect, connect1
+# import psycopg2
 
 def execute_query(query, return_result=True, connection_method = connect1()):
     connection_method.cursor().execute(query)

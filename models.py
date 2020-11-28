@@ -1,7 +1,8 @@
-import hashlib
+# import hashlib
 from functions import hash_password, check_password, generate_salt
 from connection import connect, connect1
 import datetime
+# import psycopg2
 
 class User:
     def __init__(self, username="", password="", salt=""):
