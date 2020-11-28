@@ -1,9 +1,7 @@
 import argparse
-# import psycopg2
-# from models import User
-# from connection import connect, connect1
-from functions import list_all_users, delete_user, change_password, create_user
-# from functions import hash_password, generate_salt, check_password,
+from models import User
+from connection import connect1
+from functions import hash_password, check_password
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-u", "--username", help="username")
@@ -16,29 +14,63 @@ parser.add_argument("-e", "--edit", help="edit", action="store_true")
 args = parser.parse_args()
 
 
-def aplikacja():
-        if args.password and args.username:
-            create_user(args.username, args.password)
-        elif args.username and args.password and args.edit and args.new_pass:
-            change_password(args.username, args.password, args.new_password)
-        elif args.username and args.password and args.delete:
-            delete_user(args.username, args.password)
-        elif args.list:
-            list_all_users()
+def create_user(username, password):
+    if len(password) < 8:
+        print('password is too short')
+    elif User.load_user_by_username(connect1().cursor(), username) != None:
+        print('This username already exists, choose a different one')
+    else:
+        a = User(username, password)
+        cursor = connect1().cursor()
+        a.save_to_db(cursor)
+        connect1().close()
+        return "User created"
+
+def change_password(username, password, new_pass):
+    if User.load_user_by_username(connect1().cursor(), username) == None:
+        print('This username doesn\'t exists, submit a correct username')
+    else:
+        user1 = User.load_user_by_username(connect1().cursor(), username)
+        if check_password(str(password), user1.hashed_password):
+            if len(new_pass) < 8:
+                print('Password should have minimum 8 characters')
+            else:
+                user1.hashed_password = hash_password(new_pass, 'salt')
+                user1.save_to_db(connect1().cursor())
+                connect1().close()
+                return "New password has been set"
         else:
-            return parser.print_help()
+            print('The submitted password is incorrect')
 
 
 
-# if __name__ == "__main__":
-    # create_user('Lola', 'haseleczko')
+def delete_user(username, password):
+    if User.load_user_by_username(connect1().cursor(), username) == None:
+        print('This username doesn\'t exists, submit a correct username')
+    else:
+        user1 = User.load_user_by_username(connect1().cursor(), username)
+        if check_password(str(password), user1.hashed_password):
+            user1.delete(connect1().cursor())
+            connect1().close()
+            return f"User {username} has been successfully removed"
+        else:
+            print('The submitted password is incorrect')
 
-    # aaaaaaaaaaaaaaaaaacac24793313207d1628bcc4f4931cf8c64620df388e48f653f071e38d9d2f7
-    # aaaaaaaaaaaaaaaaaacac24793313207d1628bcc4f4931cf8c64620df388e48f653f071e38d9d2f7
-    # user1 = User.load_user_by_username(connect1().cursor(), "Mamba")
 
-    # delete_user("Lola", 'haseleczko')
-    # print(check_password("dobrehaslo", ''))
-    # b = list_all_users()
-    # for i in b:
-    #     print(i.username)
+def list_all_users():
+    user1 = User.load_all_users(connect1().cursor())
+    for i in user1:
+        print(i.username)
+
+
+if __name__ == "__main__":
+    if args.password and args.username:
+        create_user(args.username, args.password)
+    elif args.username and args.password and args.edit and args.new_pass:
+        change_password(args.username, args.password, args.new_password)
+    elif args.username and args.password and args.delete:
+        delete_user(args.username, args.password)
+    elif args.list:
+        list_all_users()
+    else:
+        parser.print_help()

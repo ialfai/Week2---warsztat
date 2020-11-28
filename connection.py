@@ -30,6 +30,3 @@ def connect1(connection=connection_info):
     connection.autocommit = True
     return connection
 
-
-if __name__ == "__main__":
-    connect()

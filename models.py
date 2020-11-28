@@ -1,8 +1,7 @@
-# import hashlib
-from functions import hash_password, check_password, generate_salt
-from connection import connect, connect1
+from functions import hash_password
+from connection import connect1
 import datetime
-# import psycopg2
+
 
 class User:
     def __init__(self, username="", password="", salt=""):
@@ -43,6 +42,7 @@ class User:
                            WHERE id=%s"""
             values = (self.username, self.hashed_password, self.id)
             cursor.execute(sql, values)
+            connect1().close()
             return True
 
     @staticmethod
@@ -52,6 +52,7 @@ class User:
         '''
         cursor.execute(sql, (username,))
         data = cursor.fetchone()
+        connect1().close()
         if data:
             id_, username, hashed_password = data
             loaded_user = User(username)
@@ -70,6 +71,7 @@ class User:
         '''
         cursor.execute(sql, (id_,))
         data = cursor.fetchone()
+        connect1().close()
         if data:
             id_, username, hashed_password = data
             loaded_user = User(username)
@@ -93,6 +95,7 @@ class User:
             loaded_user.username = username
             loaded_user._hashed_password = hash_password
             users.append(loaded_user)
+            connect1().close()
         return users
 
 
@@ -102,6 +105,7 @@ class User:
         '''
         cursor.execute(sql, (self.id,))
         self._id = -1
+        connect1().close()
         return True
 
 class Messages:
@@ -116,7 +120,6 @@ class Messages:
     def id(self):
         return self._id
 
-
     def save_to_db(self, cursor):
         if self._id == -1:
             sql = """INSERT INTO messages(from_id, to_id, text, creation_date)
@@ -124,12 +127,14 @@ class Messages:
             values = (self.from_id, self.to_id, self.text, datetime.date.today())
             cursor.execute(sql, values)
             self._id = cursor.fetchone()[0]  # or cursor.fetchone()['id']
+            connect1().close()
             return True
         else:
             sql = """UPDATE messages SET from_id=%s, to_id=%s, text = %s, creation_date=%s
                             WHERE id=%s"""
             values = (self.from_id, self.to_id, self.id, self.text, datetime.date.today())
             cursor.execute(sql, values)
+            connect1().close()
             return True
 
     @staticmethod
@@ -147,14 +152,6 @@ class Messages:
             loaded_message.to_id = to_id
             loaded_message.text = text
             messages.append(loaded_message)
+            connect1().close()
         return messages
 
-
-if __name__ == "__main__":
-    cursor = connect1().cursor()
-
-    a = User.load_user_by_username(cursor, "Dodo")
-    print(a[0])
-
-
-    connect1().close()

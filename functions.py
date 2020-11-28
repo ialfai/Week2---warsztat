@@ -1,9 +1,8 @@
-# connecting to database
 import hashlib
 import random
 import string
 from connection import connect, connect1
-# import psycopg2
+
 
 def execute_query(query, return_result=True, connection_method = connect1()):
     connection_method.cursor().execute(query)
@@ -85,46 +84,3 @@ def generate_salt():
 
 
 
-def create_user(username, password):
-    if len(password) < 8:
-        print('password is too short')
-    elif User.load_user_by_username(connect1().cursor(), username) != None:
-        print('This username already exists, choose a different one')
-    else:
-        a = User(username, password)
-        cursor = connect1().cursor()
-        a.save_to_db(cursor)
-        connect1().close()
-        return "User created"
-
-def change_password(username, password, new_pass):
-    if User.load_user_by_username(connect1().cursor(), username) == None:
-        print('This username doesn\'t exists, submit a correct username')
-    else:
-        user1 = User.load_user_by_username(connect1().cursor(), username)
-        if check_password(str(password), user1.hashed_password):
-            if len(new_pass) < 8:
-                print('Password should have minimum 8 characters')
-            else:
-                user1.hashed_password = hash_password(new_pass, 'salt')
-                user1.save_to_db(connect1().cursor())
-                return "New password has been set"
-        else:
-            print('The submitted password is incorrect')
-
-
-
-def delete_user(username, password):
-    if User.load_user_by_username(connect1().cursor(), username) == None:
-        print('This username doesn\'t exists, submit a correct username')
-    else:
-        user1 = User.load_user_by_username(connect1().cursor(), username)
-        if check_password(str(password), user1.hashed_password):
-            user1.delete(connect1().cursor())
-            return f"User {username} has been successfully removed"
-        else:
-            print('The submitted password is incorrect')
-
-
-def list_all_users():
-    return User.load_all_users(connect1().cursor())

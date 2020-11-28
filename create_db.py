@@ -2,7 +2,6 @@
 
 from functions import execute_query
 from connection import connect, connect1
-# import psycopg2
 
 # Database
 
