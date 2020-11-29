@@ -30,7 +30,7 @@ query_users_table = '''
 query_messages_table = '''
     CREATE TABLE messages(
     id serial primary key,
-    from_id int unique,
+    from_id int,
     to_id int, 
     text varchar (300),
     creation_date timestamp,

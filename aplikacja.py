@@ -11,6 +11,7 @@ parser.add_argument("-l", "--list", help="list users", action="store_true")
 parser.add_argument("-d", "--delete", help="delete user", action="store_true")
 parser.add_argument("-e", "--edit", help="edit", action="store_true")
 
+
 args = parser.parse_args()
 
 
@@ -81,24 +82,24 @@ def send_a_massage(username, password, to_id, text):
     else:
         user1 = User.load_user_by_username(connect1().cursor(), username)
         if check_password(str(password), user1.hashed_password):
-            from_id = user1.id
-            message1 = Messages(from_id, to_id, text)
-            message1.save_to_db(connect1().cursor())
-            return "Message sent"
+            a = User.load_user_by_id(connect1().cursor(), to_id)
+            if a != None:
+                if len(text) < 255:
+                    from_id = user1.id
+                    message1 = Messages(from_id, to_id, text)
+                    message1.save_to_db(connect1().cursor())
+                    return "Message sent"
+                else:
+                    print('Your message is too long, should be maximum 255 characters')
+            else:
+                print("Receiver\'s id is incorrect")
+        else:
+            print('Wrong password')
 
 
 
 
-
-
-
-
-
-
-
-
-
-# if __name__ == "__main__":
+if __name__ == "__main__":
     if args.password and args.username:
         create_user(args.username, args.password)
     elif args.username and args.password and args.edit and args.new_pass:
@@ -110,12 +111,3 @@ def send_a_massage(username, password, to_id, text):
     else:
         parser.print_help()
 
-
-if __name__ == "__main__":
-
-    # create_user("Baba", 'Beirut123')
-    # a = User.load_user_by_username(connect1().cursor() ,"Baba")
-    # print(a.id)
-    # b = list_all_messages("Baba", "Beirut123")
-    # for i in b:
-    #     print(i.creation_date)
