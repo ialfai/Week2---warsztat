@@ -1,5 +1,5 @@
 import argparse
-from models import User
+from models import User, Messages
 from connection import connect1
 from functions import hash_password, check_password
 
@@ -62,8 +62,43 @@ def list_all_users():
     for i in user1:
         print(i.username)
 
+def list_all_messages(username, password):
+    if User.load_user_by_username(connect1().cursor(), username) == None:
+        print('This username doesn\'t exists, submit a correct username')
+    else:
+        user1 = User.load_user_by_username(connect1().cursor(), username)
+        if check_password(str(password), user1.hashed_password):
+            messages = user1.load_messages_by_user_id(connect1().cursor())
+            return messages
+        else:
+            print('The submitted password is incorrect')
 
-if __name__ == "__main__":
+
+
+def send_a_massage(username, password, to_id, text):
+    if User.load_user_by_username(connect1().cursor(), username) == None:
+        print('This username doesn\'t exists, submit a correct username')
+    else:
+        user1 = User.load_user_by_username(connect1().cursor(), username)
+        if check_password(str(password), user1.hashed_password):
+            from_id = user1.id
+            message1 = Messages(from_id, to_id, text)
+            message1.save_to_db(connect1().cursor())
+            return "Message sent"
+
+
+
+
+
+
+
+
+
+
+
+
+
+# if __name__ == "__main__":
     if args.password and args.username:
         create_user(args.username, args.password)
     elif args.username and args.password and args.edit and args.new_pass:
@@ -74,3 +109,13 @@ if __name__ == "__main__":
         list_all_users()
     else:
         parser.print_help()
+
+
+if __name__ == "__main__":
+
+    # create_user("Baba", 'Beirut123')
+    # a = User.load_user_by_username(connect1().cursor() ,"Baba")
+    # print(a.id)
+    # b = list_all_messages("Baba", "Beirut123")
+    # for i in b:
+    #     print(i.creation_date)

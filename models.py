@@ -108,6 +108,23 @@ class User:
         connect1().close()
         return True
 
+
+    def load_messages_by_user_id(self, cursor):
+        sql = f'''
+            SELECT id, from_id, to_id, text, creation_date FROM messages
+            WHERE to_id = '{self.id}'
+            '''
+        messages = []
+        cursor.execute(sql)
+        for row in cursor.fetchall():
+            id_, from_id, to_id, text, creation_date = row
+            loaded_message = Messages(from_id, to_id, text)
+            loaded_message._id = id_
+            loaded_message.creation_date = creation_date
+            messages.append(loaded_message)
+        connect1().close()
+        return messages
+
 class Messages:
     def __init__(self, from_id, to_id, text):
         self._id = -1
